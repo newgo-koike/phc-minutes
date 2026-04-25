@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>岩﨑くんMTG 議事録</title>
+<style>
+  :root {
+    --bg: #f5f5f3; --card: #ffffff; --ink: #1a1a1a; --ink-sub: #555;
+    --ink-mute: #888; --line: #e5e5e0; --accent: #2563eb; --accent-soft: #dbeafe;
+    --green: #16a34a; --green-soft: #dcfce7; --green-border: #86efac;
+    --amber: #d97706; --amber-soft: #fef3c7;
+    --red: #dc2626; --red-soft: #fee2e2;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --chip: #f1f1ee; --teal: #0d9488; --teal-soft: #ccfbf1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.7; font-size: 14px; }
+  .viewer-bar { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--line); padding: 10px 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .viewer-type { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .viewer-type .type-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: #ede9fe; color: #7c3aed; margin-right: 8px; }
+  .viewer-select { font-size: 13px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--chip); color: var(--ink); min-width: 320px; cursor: pointer; }
+  .viewer-count { font-size: 12px; color: var(--ink-mute); margin-left: auto; white-space: nowrap; }
+  .container { max-width: 920px; margin: 0 auto; padding: 28px 24px 80px; }
+  .header { margin-bottom: 28px; }
+  .header-tags { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .tag-blue { background: var(--accent-soft); color: var(--accent); }
+  .tag-green { background: var(--green-soft); color: var(--green); }
+  .tag-purple { background: var(--purple-soft); color: var(--purple); }
+  .tag-amber { background: var(--amber-soft); color: var(--amber); }
+  .tag-teal { background: var(--teal-soft); color: var(--teal); }
+  .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; line-height: 1.4; }
+  .header-sub { font-size: 13px; color: var(--ink-mute); margin-bottom: 14px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; color: var(--ink-sub); }
+  .meta-item { display: flex; align-items: center; gap: 5px; }
+  .section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .decisions { border-left: 4px solid var(--green); }
+  .decision-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .decision-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .decision-item:first-child { padding-top: 0; }
+  .decision-num { flex-shrink: 0; width: 26px; height: 26px; background: var(--green); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin-top: 1px; }
+  .decision-text { font-size: 14px; }
+  .decision-text strong { color: var(--green); }
+  .discussion-topic { margin-bottom: 24px; }
+  .discussion-topic:last-child { margin-bottom: 0; }
+  .topic-header { font-size: 14px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .topic-label { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--chip); color: var(--ink-sub); }
+  .utterance { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .avatar { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; margin-top: 2px; }
+  .bubble { background: #f8f8f6; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.65; flex: 1; }
+  .bubble .speaker-name { font-size: 11px; font-weight: 700; color: var(--ink-mute); margin-bottom: 3px; }
+  .conclusion-box { background: var(--green-soft); border: 1px solid var(--green-border); border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 13px; }
+  .conclusion-box .cb-label { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  .quote-box { background: var(--amber-soft); border-left: 4px solid var(--amber); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; }
+  .quote-text { font-size: 14px; font-weight: 600; line-height: 1.6; }
+  .quote-attr { font-size: 12px; color: var(--ink-mute); margin-top: 6px; }
+  .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .comp-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-align: center; }
+  .comp-card .ci { font-size: 28px; margin-bottom: 6px; }
+  .comp-card .ct { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .comp-card .cd { font-size: 12px; color: var(--ink-sub); line-height: 1.5; }
+  .flow-diagram { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: wrap; justify-content: center; }
+  .flow-step { background: var(--accent-soft); border: 1px solid #93c5fd; border-radius: 8px; padding: 10px 16px; text-align: center; font-size: 12px; font-weight: 600; color: var(--accent); min-width: 90px; }
+  .flow-arrow { font-size: 18px; color: var(--ink-mute); padding: 0 4px; }
+  .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 14px 0; }
+  .metric-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; }
+  .metric-card .mv { font-size: 26px; font-weight: 800; }
+  .metric-card .ml { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .person-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .person-card { background: #f8f8f6; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .person-card .pn { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .person-card .pnote { font-size: 12px; color: var(--ink-sub); line-height: 1.5; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .benchmark-list { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .benchmark-chip { font-size: 12px; padding: 4px 12px; background: var(--chip); border: 1px solid var(--line); border-radius: 20px; }
+  .info-label { font-size: 12px; font-weight: 700; color: var(--ink-mute); margin-bottom: 6px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+  .data-table th { background: var(--chip); text-align: left; padding: 8px 10px; font-weight: 600; font-size: 12px; color: var(--ink-sub); border-bottom: 2px solid var(--line); }
+  .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .badge-green { background: var(--green-soft); color: var(--green); }
+  .badge-amber { background: var(--amber-soft); color: var(--amber); }
+  .badge-blue { background: var(--accent-soft); color: var(--accent); }
+  .action-group { margin-bottom: 16px; }
+  .action-group:last-child { margin-bottom: 0; }
+  .action-group-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .action-group-avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+  .ag-overlap { margin-left: -8px; }
+  .action-group-name { font-size: 13px; font-weight: 700; }
+  .action-list { list-style: none; }
+  .action-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .action-item:last-child { border-bottom: none; }
+  .action-check { flex-shrink: 0; width: 18px; height: 18px; border: 2px solid var(--line); border-radius: 4px; margin-top: 2px; }
+  .action-text { flex: 1; }
+  .action-deadline { flex-shrink: 0; font-size: 12px; color: var(--ink-mute); background: var(--chip); padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+  .next-meeting { background: var(--accent-soft); border: 1px solid #93c5fd; border-radius: 12px; padding: 18px 24px; margin-top: 16px; display: flex; align-items: center; gap: 14px; }
+  .next-meeting .nm-icon { font-size: 28px; }
+  .next-meeting .nm-info { font-size: 14px; font-weight: 700; color: var(--accent); }
+  .next-meeting .nm-sub { font-weight: 400; font-size: 13px; color: var(--ink-sub); display: block; margin-top: 2px; }
+  .bubble ul { padding-left: 16px; margin-top: 6px; }
+  .bubble li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<div class="viewer-bar">
+  <div class="viewer-type"><span class="type-badge">岩﨑くん</span>AI MT 議事録</div>
+  <select class="viewer-select" id="dateSelect"></select>
+  <div class="viewer-count" id="countLabel"></div>
+</div>
+
+<div class="container" id="content"></div>
+
+<script>
+const SP = {
+  "小池": { s: "小", c: "#3b82f6" },
+  "兵頭": { s: "兵", c: "#92400e" },
+  "宮崎": { s: "宮", c: "#c2410c" },
+  "岩崎": { s: "岩", c: "#7c3aed" },
+};
+
+function R(m) {
+  return `
+    <div class="header">
+      <div class="header-tags">${m.tags.map(t => `<span class="tag tag-${t[1]}">${t[0]}</span>`).join('')}</div>
+      <h1>${m.title}</h1>
+      <div class="header-sub">${m.subtitle}</div>
+      <div class="meta-row">
+        <span class="meta-item">📅 ${m.date}</span>
+        <span class="meta-item">👥 ${m.participants}</span>
+        <span class="meta-item">🕐 ${m.duration}</span>
+        <span class="meta-item">💻 ${m.format || 'Google Meet'}</span>
+      </div>
+    </div>
+    ${rDec(m.decisions)}
+    ${rTopics(m.topics)}
+    ${rActions(m.actions)}
+    ${rNext(m.nextMeeting)}
+  `;
+}
+function rDec(ds) {
+  return `<div class="section decisions"><div class="section-title">✅ 決定事項</div>
+    ${ds.map((d,i) => `<div class="decision-item"><div class="decision-num">${i+1}</div><div class="decision-text"><strong>${d[0]}</strong>：${d[1]}</div></div>`).join('')}
+  </div>`;
+}
+function rTopics(topics) {
+  return `<div class="section"><div class="section-title">💬 議論ハイライト</div>
+    ${topics.map((t,i) => `<div class="discussion-topic">
+      <div class="topic-header"><span class="topic-label">TOPIC ${i+1}</span>${t.title}</div>
+      ${t.blocks.map(rBlock).join('')}
+    </div>`).join('')}
+  </div>`;
+}
+function rBlock(b) {
+  const type = b[0];
+  if (type === 'u') { const sp = SP[b[1]] || {s:b[1][0],c:'#666'}; return `<div class="utterance"><div class="avatar" style="background:${sp.c}">${sp.s}</div><div class="bubble" style="border-left:3px solid ${sp.c}"><div class="speaker-name">${b[1]}</div>${b[2]}</div></div>`; }
+  if (type === 'conclusion') return `<div class="conclusion-box"><div class="cb-label">結論</div>${b[1]}</div>`;
+  if (type === 'quote') return `<div class="quote-box"><div class="quote-text">「${b[1]}」</div><div class="quote-attr">― ${b[2]}</div></div>`;
+  if (type === 'comparison') return `<div class="comparison-grid">${b[1].map(c => `<div class="comp-card"><div class="ci">${c[0]}</div><div class="ct">${c[1]}</div><div class="cd">${c[2]}</div></div>`).join('')}</div>`;
+  if (type === 'flow') return `<div class="flow-diagram">${b[1].map((s,i) => (i>0?'<div class="flow-arrow">→</div>':'') + `<div class="flow-step">${s}</div>`).join('')}</div>`;
+  if (type === 'metrics') return `<div class="metric-row">${b[1].map(m => `<div class="metric-card"><div class="mv" style="color:${m[2]||'var(--accent)'}">${m[0]}</div><div class="ml">${m[1]}</div></div>`).join('')}</div>`;
+  if (type === 'persons') return `<div class="person-grid">${b[1].map(p => `<div class="person-card"><div class="pn"><span class="dot" style="background:${p[2]}"></span>${p[0]}</div><div class="pnote">${p[1]}</div></div>`).join('')}</div>`;
+  if (type === 'benchmarks') return `<div><div class="info-label">${b[2]||'ベンチマーク'}</div><div class="benchmark-list">${b[1].map(x=>`<span class="benchmark-chip">${x}</span>`).join('')}</div></div>`;
+  if (type === 'table') return `<table class="data-table"><thead><tr>${b[1].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${b[2].map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  return '';
+}
+function rActions(actions) {
+  const groups = {};
+  actions.forEach(a => { const key = a.assignees.map(x=>x[0]).join('・'); if (!groups[key]) groups[key] = {assignees:a.assignees,items:[]}; groups[key].items.push(a); });
+  return `<div class="section"><div class="section-title">📋 ネクストアクション</div>
+    ${Object.values(groups).map(g => `<div class="action-group">
+      <div class="action-group-header">
+        ${g.assignees.map((a,i) => { const sp = SP[a[0]]||{s:a[0][0],c:'#666'}; return `<div class="action-group-avatar${i>0?' ag-overlap':''}" style="background:${sp.c}">${sp.s}</div>`; }).join('')}
+        <div class="action-group-name">${g.assignees.map(a=>a[0]).join('・')}</div>
+      </div>
+      <ul class="action-list">${g.items.map(a => `<li class="action-item"><div class="action-check"></div><div class="action-text">${a.text}</div>${a.deadline?`<div class="action-deadline">${a.deadline}</div>`:''}</li>`).join('')}</ul>
+    </div>`).join('')}
+  </div>`;
+}
+function rNext(n) { if (!n) return ''; return `<div class="next-meeting"><div class="nm-icon">📅</div><div class="nm-info">${n.text}<span class="nm-sub">${n.sub||''}</span></div></div>`; }
+
+const MEETINGS = [
+/* __INSERT_NEW_MEETING_HERE__ */
+{
+  date: "2026/04/22",
+  title: "AIサービス方針決定とスキル一覧化戦略",
+  subtitle: "Pharma Eight∞ AI MT ― 選択肢2（LP・業務フロー・投稿自動化）をメインに、ターゲット2セグメント、5月販売開始",
+  tags: [["AI MT","purple"],["サービス設計","blue"],["販売戦略","green"]],
+  participants: "小池雄悟・兵頭将宏・岩﨑康介",
+  duration: "約50分",
+  format: "Google Meet",
+  decisions: [
+    ["選択肢2番をメインサービスに決定","LP作成・業務フロー設計・投稿自動化など幅広いニーズに対応。売りやすく提案しやすいサービス内容。"],
+    ["ターゲットを2セグメントに絞る","①主婦・ワーキングママ層（非ビジネス層）②フリーランス・個人事業主（ビジネス層）の2パターン。"],
+    ["スキル一覧をデータベース化","Claude Codeでできることを全てラインナップ化。課題→解決方法→ビフォーアフターの形式で整理し、セールス資料に。"],
+    ["SNS自動化は別サービスとして展開","現時点で一番売れそうなサービス。効果はコンテンツ次第なので、自動化の仕組み提供に徹する。"],
+    ["5月から販売開始","データベース完成→セールス資料作成→販売スタートの流れ。"]
+  ],
+  topics: [
+    {
+      title: "メインサービスの方向性決定",
+      blocks: [
+        ["u","小池","5つの選択肢の中でどれに着手するか。まず1個だけでいくか複数でいくか。"],
+        ["u","岩崎","選択肢1は作業量が少なく資料1個で使い回せるが、ポストが少ない。2番が一番イメージしやすい。"],
+        ["u","兵頭","選択肢4・5はエラーが本番環境でクライアントの顧客に直接影響する。責任の重さから慎重に扱うべき。"],
+        ["table",["選択肢","評価","備考"],[["1. ツール導入支援","<span class='badge badge-green'>簡単</span>","作業量少ない・資料1個で使い回せる"],["2. LP・業務フロー・自動化","<span class='badge badge-green'>メイン採用</span>","ニーズ広い・提案しやすい"],["3. 社内DB・チャットボット","<span class='badge badge-blue'>検討継続</span>","古い業界向けに可能性あり"],["4-5. 本番システム構築","<span class='badge badge-amber'>慎重に</span>","エラーの責任が重い"]]],
+        ["conclusion","選択肢2をメインターゲットに決定。選択肢3も有望として検討継続。4・5は責任の重さから初期は避ける。"]
+      ]
+    },
+    {
+      title: "代行ニーズ vs 学習ニーズ",
+      blocks: [
+        ["u","小池","ツールを極めたい人はあんまりいない。事業者は便利に・時短したいだけ。「お願いします」の方が圧倒的に多い。"],
+        ["u","岩崎","設計するところで差が付く。欲しいものをあげることはみんなできるが、機能の組み合わせ・構成を考えるのが価値。"],
+        ["quote","ツールを極めたいっていう人はあんまりいない。事業者は便利にやりたいよ、時短にしたいっていうだけ","小池"],
+        ["comparison",[["🔧","代行サービス（メイン）","ヒアリング→設計→納品<br>修正依頼だけでOK<br>顧客は構造を理解不要"],["📚","認定講座（将来）","ゼロから作れる人を育成<br>構造からの理解が必要<br>認定制度として展開"]]],
+        ["conclusion","メインは代行サービス。ヒアリング→設計→納品のフローで価値提供。学びたい人向けには将来的に認定講座を検討。"]
+      ]
+    },
+    {
+      title: "スキル一覧の構築戦略",
+      blocks: [
+        ["u","小池","Claude Codeでできることを全部ラインナップ化して、おでんのように一覧から選べる形式にしたい。"],
+        ["u","岩崎","出発点は「めんどくさい」を探すこと。同席アポの自動化（フォーム入力→Googleカレンダー登録→LINE通知）のような事例をどんどん作っていく。"],
+        ["flow",["課題の洗い出し","解決策の設計","ツール作成","一覧DB化","セールス資料"]],
+        ["u","小池","TimelexのようなSaaS予約ツールも自作可能。Googleカレンダーから空き時間を読み取り予約フォーム化。汎用ツールより自分の環境に特化できるのが強み。"],
+        ["conclusion","Notionに共有DBを作成し全員で課題・解決策を追加。所要時間・難易度・費用感も含めてセールス資料に落とし込む。"]
+      ]
+    },
+    {
+      title: "SNS自動化の位置づけ",
+      blocks: [
+        ["u","小池","SNS自動化は別サービスとして切り出す。現時点で一番売れそう。"],
+        ["u","兵頭","効果が出るかはコンテンツ・コンセプト次第でAIとは関係ない。自動化の仕組み提供に徹し、発信内容の責任はクライアントが持つべき。"],
+        ["u","小池","メインサービスとの親和性は高い。組み合わせて提供するのもあり。Pharma Eight∞の人気サービスになる可能性。"],
+        ["conclusion","SNS自動化は別サービスだがメインとの親和性が高い。自動化の仕組み提供に徹し、コンテンツの責任はクライアント側。"]
+      ]
+    }
+  ],
+  actions: [
+    { assignees: [["岩崎"]], text: "Notionに共有データベースを作成（課題・解決策の一覧）", deadline: "翌日" },
+    { assignees: [["小池"],["兵頭"],["岩崎"]], text: "データベースに課題・解決策を追加していく", deadline: "1週間" },
+    { assignees: [["小池"],["兵頭"],["岩崎"]], text: "セールス資料の完成", deadline: "来週MTGまで" },
+    { assignees: [["岩崎"]], text: "SNS自動化の仕組み構築を継続", deadline: "継続" },
+    { assignees: [["小池"]], text: "セールス資料作成スキルの構築（自動化）", deadline: "来週" }
+  ],
+  nextMeeting: { text: "次回MTG：来週（日程調整中）", sub: "セールス資料レビュー・5月販売開始準備" }
+},
+{
+  date: "2026/04/15",
+  title: "AI講座のケーススタディ設計と価格・ターゲット市場の方針決定",
+  subtitle: "Pharma Eight∞ AI MT ― AIコンサルタント育成の出口設計、ケース別講座構成、価格設定、ターゲット市場分析",
+  tags: [["AI MT","purple"],["講座設計","blue"],["価格戦略","green"]],
+  participants: "小池雄悟・兵頭将宏・岩﨑康介",
+  duration: "約80分",
+  format: "Google Meet",
+  decisions: [
+    ["講座の出口はAIコンサルタントとしてのサポート能力提供","受講者が自分の道具を作れるレベルを目指す。エージェントAIまで触れる・使えるレベルが目標。"],
+    ["講座はケーススタディ中心の構成","フェーズ別ではなく、具体的な課題解決に焦点を当てたケース別講座。基礎共通講座＋ケース別講座の複合型で、プランに応じて選択可能。"],
+    ["まず事例作りを優先","講座化の前に、実際のクライアント案件を受注して事例を積み上げる。モニター価格で実案件を受け、ケーススタディを蓄積する方が最も早い。"],
+    ["価格設定：初期20万円×3ヶ月＋保守月額3〜5万円","オーダーメイド型で内容に応じた見積もり方式。ライト・スタンダード・プレミアムの3段階プランを設定予定。"],
+    ["プランの区分はインパクトの大きさで分類","ライト＝基本的な業務効率化、スタンダード＝より大きな業務改善、プレミアム＝採用・SNS運用など会社全体に影響する施策。"]
+  ],
+  topics: [
+    {
+      title: "講座の3段階フェーズ設計",
+      blocks: [
+        ["u","岩崎","講座を3段階で設計した。フェーズ1はAIに仕事を頼める人（ChatGPT・Gemini等の既存ツールを最適化して使用）、フェーズ2はツールをつなげる人（Notion等のDB連携、複数ツールの横断的活用）、フェーズ3は道具自体を作れる人（トリガー→情報ソース→AI処理→アウトプット先まで設計）。"],
+        ["flow",["フェーズ1: AIに頼める","フェーズ2: ツールを繋げる","フェーズ3: 道具を作れる"]],
+        ["u","兵頭","フェーズ別ではなくケース別の方が学習者に具体的なイメージを持たせやすい。15〜20個程度の頻出ビジネス課題を網羅できれば、AI業務効率化コンサルとして対応可能。"],
+        ["conclusion","フェーズ別ではなくケース別の構成を採用。基礎共通講座＋ケース別講座の複合型で、プランに応じて選択可能。"]
+      ]
+    },
+    {
+      title: "基礎講座＋ケーススタディの複合型",
+      blocks: [
+        ["u","小池","基礎（共通）はIDE操作、Claude Code、エージェント概念、AI活用のマインドセット。ケース別はスプレッドシートデータまとめ、SNS自動化再現、予約システム構築等。"],
+        ["u","岩崎","プランに応じて選択できるケース数を変え、追加購入も可能にする構成にしたい。週1回のペースで新しいケースを作成中。"],
+        ["comparison",[
+          ["📚","基礎（共通）講座","IDE操作 / Claude Code<br>エージェント概念<br>AI活用マインドセット"],
+          ["🔧","ケース別講座","スプシデータまとめ<br>SNS自動化再現<br>予約システム構築 等"]
+        ]],
+        ["conclusion","プランに応じてケース数を変え、追加購入も可能に。週1で新ケース作成中。"]
+      ]
+    },
+    {
+      title: "ターゲット市場の検討",
+      blocks: [
+        ["u","兵頭","業界ごとにAI導入のインパクトが違う。医療クリニック、福祉・介護、営業・新規事業系が有望。薬局は既存ツールで完結する業務が多く優先度低。"],
+        ["u","小池","運送・不動産・PR広告はアナログ業務が多い業界で可能性がある。"],
+        ["table",
+          ["業界","評価","備考"],
+          [
+            ["医療クリニック","<span class='badge badge-green'>有望</span>","書類整理・スタッフ教育・業務自動化。電子カルテ連携は困難"],
+            ["福祉・介護","<span class='badge badge-green'>有望</span>","月次・年次報告書類の自動化。インパクト大"],
+            ["営業・新規事業系","<span class='badge badge-blue'>高ニーズ</span>","AI導入メリットが大きい"],
+            ["運送・不動産・PR広告","<span class='badge badge-blue'>検討中</span>","アナログ業務が多い業界"],
+            ["薬局","<span class='badge badge-amber'>優先度低</span>","既存ツールで完結する業務が多い"]
+          ]
+        ],
+        ["conclusion","医療クリニック・福祉介護・営業系を優先ターゲットに。薬局は優先度低。"]
+      ]
+    },
+    {
+      title: "医療分野のAI導入制約",
+      blocks: [
+        ["u","岩崎","電子カルテやレセコンは個人情報を含みAPIが公開されていないため、他ツールとの連携が困難。"],
+        ["u","小池","AI導入は採用・アライアンス等の「雑務」自動化に焦点を当てるべき。コア業務（カルテ等）は触れない。"],
+        ["conclusion","医療分野のAI導入はコア業務（カルテ・レセコン）ではなく、採用・雑務の自動化に焦点を絞る。"]
+      ]
+    },
+    {
+      title: "事例作りの戦略と価格設定",
+      blocks: [
+        ["u","兵頭","まずクリニック案件など具体的なプロジェクトから着手する。「何でもできます」ではなく具体的な事例の蓄積が重要。"],
+        ["u","小池","セールス資料は5枚程度の簡潔なスライドを作成。顧客の「めんどくさい」を解決する事例パターンを構築していく。"],
+        ["metrics",[
+          ["20万円","初期費用 / 月","#2563eb"],
+          ["3ヶ月","基本契約期間","#16a34a"],
+          ["3-5万円","保守月額","#d97706"]
+        ]],
+        ["comparison",[
+          ["⚡","ライト","基本的な業務効率化<br>単純作業の自動化"],
+          ["🚀","スタンダード / プレミアム","より大きな業務改善〜<br>採用・SNS運用など全社施策"]
+        ]],
+        ["conclusion","モニター価格で実案件を受け事例を蓄積。5枚のセールス資料で営業開始。"]
+      ]
+    }
+  ],
+  actions: [
+    { assignees: [["岩崎"]], text: "ライト・スタンダード・プレミアムの3段階パッケージ叩き台作成（5枚スライド）", deadline: "〜4/17（水）" },
+    { assignees: [["岩崎"]], text: "法人プラン・個人プランの最低限の区分を整理", deadline: "〜4/17（水）" },
+    { assignees: [["小池"]], text: "AI関連ディスカッション用Slackチャンネルの作成", deadline: "今週中" },
+    { assignees: [["兵頭"]], text: "AIサポートコンサルの先行営業・顧客獲得", deadline: "継続" },
+    { assignees: [["小池"],["兵頭"]], text: "アプローチ先の業界・顧客リストアップ", deadline: "〜4/17（水）" },
+    { assignees: [["小池"],["兵頭"],["岩崎"]], text: "水曜日にプラン案とアプローチリストを検討", deadline: "4/17（水）" }
+  ],
+  nextMeeting: { text: "次回MTG：2026年4月17日（水）", sub: "岩﨑くん作成の価格プラン案 + アプローチ先リストの検討" }
+},
+];
+
+const sel = document.getElementById('dateSelect');
+const content = document.getElementById('content');
+const countLabel = document.getElementById('countLabel');
+MEETINGS.forEach((m, i) => { const opt = document.createElement('option'); opt.value = i; opt.textContent = m.date + '  ' + m.title; sel.appendChild(opt); });
+countLabel.textContent = `全${MEETINGS.length}件`;
+function show(i) { content.innerHTML = R(MEETINGS[i]); }
+sel.addEventListener('change', () => show(sel.value));
+show(0);
+</script>
+</body>
+</html>

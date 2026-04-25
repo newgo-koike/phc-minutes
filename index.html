@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaEight MTG 議事録</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --ink:#1a1a1a; --ink-sub:#555; --ink-mute:#888; --line:#e5e5e0; --accent:#1f6feb; --accent-soft:#e8f0fe; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .container { max-width:560px; width:100%; padding:40px 20px; }
+  h1 { font-size:22px; margin-bottom:6px; }
+  .sub { font-size:13px; color:var(--ink-mute); margin-bottom:32px; }
+  .cards { display:flex; flex-direction:column; gap:12px; }
+  a.card { display:flex; align-items:center; gap:16px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 24px; text-decoration:none; color:var(--ink); transition:box-shadow .15s,border-color .15s; }
+  a.card:hover { border-color:var(--accent); box-shadow:0 2px 12px rgba(31,111,235,.12); }
+  .icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .icon-y { background:#fef3c7; }
+  .icon-p { background:#f3e8ff; }
+  .icon-b { background:var(--accent-soft); }
+  .card-body h2 { font-size:16px; margin-bottom:2px; }
+  .card-body p { font-size:13px; color:var(--ink-sub); }
+  .badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; margin-left:8px; }
+  .badge-y { background:#fef3c7; color:#b45309; }
+  .badge-p { background:#f3e8ff; color:#6b21a8; }
+  .badge-b { background:var(--accent-soft); color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>PharmaEight MTG 議事録</h1>
+  <p class="sub">閲覧したい議事録カテゴリを選択してください</p>
+  <div class="cards">
+    <a class="card" href="index-miyazaki.html">
+      <div class="icon icon-y">&#128204;</div>
+      <div class="card-body">
+        <h2>宮崎さんコンサルMTG<span class="badge badge-y">4件</span></h2>
+        <p>宮崎博貴さんとのコンサルティングMTG議事録</p>
+      </div>
+    </a>
+    <a class="card" href="index-iwasaki.html">
+      <div class="icon icon-p">&#128187;</div>
+      <div class="card-body">
+        <h2>岩﨑くんAI MTG<span class="badge badge-p">2件</span></h2>
+        <p>岩﨑康介さんとのAI関連MTG議事録</p>
+      </div>
+    </a>
+    <a class="card" href="index-internal.html">
+      <div class="icon icon-b">&#128101;</div>
+      <div class="card-body">
+        <h2>内部MTG<span class="badge badge-b">2件</span></h2>
+        <p>小池・兵頭の社内ミーティング議事録</p>
+      </div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

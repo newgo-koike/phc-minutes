@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宮崎さんコンサルMTG 議事録</title>
+<style>
+  :root {
+    --bg: #f5f5f3; --card: #ffffff; --ink: #1a1a1a; --ink-sub: #555;
+    --ink-mute: #888; --line: #e5e5e0; --accent: #2563eb; --accent-soft: #dbeafe;
+    --green: #16a34a; --green-soft: #dcfce7; --green-border: #86efac;
+    --amber: #d97706; --amber-soft: #fef3c7;
+    --red: #dc2626; --red-soft: #fee2e2;
+    --purple: #7c3aed; --purple-soft: #ede9fe;
+    --chip: #f1f1ee; --teal: #0d9488; --teal-soft: #ccfbf1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.7; font-size: 14px; }
+
+  /* ── Viewer Bar ── */
+  .viewer-bar { position: sticky; top: 0; z-index: 100; background: #fff; border-bottom: 1px solid var(--line); padding: 10px 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .viewer-type { font-size: 14px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .viewer-type .type-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: #fef3c7; color: #92400e; margin-right: 8px; }
+  .viewer-select { font-size: 13px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--chip); color: var(--ink); min-width: 320px; cursor: pointer; }
+  .viewer-count { font-size: 12px; color: var(--ink-mute); margin-left: auto; white-space: nowrap; }
+
+  /* ── Container ── */
+  .container { max-width: 920px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  /* ── Header ── */
+  .header { margin-bottom: 28px; }
+  .header-tags { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .tag-blue { background: var(--accent-soft); color: var(--accent); }
+  .tag-green { background: var(--green-soft); color: var(--green); }
+  .tag-purple { background: var(--purple-soft); color: var(--purple); }
+  .tag-amber { background: var(--amber-soft); color: var(--amber); }
+  .tag-teal { background: var(--teal-soft); color: var(--teal); }
+  .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; line-height: 1.4; }
+  .header-sub { font-size: 13px; color: var(--ink-mute); margin-bottom: 14px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; color: var(--ink-sub); }
+  .meta-item { display: flex; align-items: center; gap: 5px; }
+
+  /* ── Section ── */
+  .section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+  /* ── Decisions ── */
+  .decisions { border-left: 4px solid var(--green); }
+  .decision-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .decision-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .decision-item:first-child { padding-top: 0; }
+  .decision-num { flex-shrink: 0; width: 26px; height: 26px; background: var(--green); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin-top: 1px; }
+  .decision-text { font-size: 14px; }
+  .decision-text strong { color: var(--green); }
+
+  /* ── Discussion ── */
+  .discussion-topic { margin-bottom: 24px; }
+  .discussion-topic:last-child { margin-bottom: 0; }
+  .topic-header { font-size: 14px; font-weight: 700; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .topic-label { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--chip); color: var(--ink-sub); }
+
+  /* Speaker bubbles */
+  .utterance { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .avatar { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; margin-top: 2px; }
+  .bubble { background: #f8f8f6; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.65; flex: 1; }
+  .bubble .speaker-name { font-size: 11px; font-weight: 700; color: var(--ink-mute); margin-bottom: 3px; }
+
+  /* Conclusion / Quote / Diagram */
+  .conclusion-box { background: var(--green-soft); border: 1px solid var(--green-border); border-radius: 8px; padding: 12px 16px; margin-top: 10px; font-size: 13px; }
+  .conclusion-box .cb-label { font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  .quote-box { background: var(--amber-soft); border-left: 4px solid var(--amber); border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 12px 0; }
+  .quote-text { font-size: 14px; font-weight: 600; line-height: 1.6; }
+  .quote-attr { font-size: 12px; color: var(--ink-mute); margin-top: 6px; }
+  .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .comp-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-align: center; }
+  .comp-card .ci { font-size: 28px; margin-bottom: 6px; }
+  .comp-card .ct { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .comp-card .cd { font-size: 12px; color: var(--ink-sub); line-height: 1.5; }
+  .flow-diagram { display: flex; align-items: center; gap: 0; margin: 14px 0; flex-wrap: wrap; justify-content: center; }
+  .flow-step { background: var(--accent-soft); border: 1px solid #93c5fd; border-radius: 8px; padding: 10px 16px; text-align: center; font-size: 12px; font-weight: 600; color: var(--accent); min-width: 90px; }
+  .flow-arrow { font-size: 18px; color: var(--ink-mute); padding: 0 4px; }
+  .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 14px 0; }
+  .metric-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; }
+  .metric-card .mv { font-size: 26px; font-weight: 800; }
+  .metric-card .ml { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .person-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  .person-card { background: #f8f8f6; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .person-card .pn { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .person-card .pnote { font-size: 12px; color: var(--ink-sub); line-height: 1.5; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+  .benchmark-list { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .benchmark-chip { font-size: 12px; padding: 4px 12px; background: var(--chip); border: 1px solid var(--line); border-radius: 20px; }
+  .info-label { font-size: 12px; font-weight: 700; color: var(--ink-mute); margin-bottom: 6px; }
+
+  /* Table (for topics with tabular data) */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+  .data-table th { background: var(--chip); text-align: left; padding: 8px 10px; font-weight: 600; font-size: 12px; color: var(--ink-sub); border-bottom: 2px solid var(--line); }
+  .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .badge-green { background: var(--green-soft); color: var(--green); }
+  .badge-amber { background: var(--amber-soft); color: var(--amber); }
+  .badge-blue { background: var(--accent-soft); color: var(--accent); }
+
+  /* ── Actions ── */
+  .action-group { margin-bottom: 16px; }
+  .action-group:last-child { margin-bottom: 0; }
+  .action-group-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .action-group-avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+  .ag-overlap { margin-left: -8px; }
+  .action-group-name { font-size: 13px; font-weight: 700; }
+  .action-list { list-style: none; }
+  .action-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .action-item:last-child { border-bottom: none; }
+  .action-check { flex-shrink: 0; width: 18px; height: 18px; border: 2px solid var(--line); border-radius: 4px; margin-top: 2px; }
+  .action-text { flex: 1; }
+  .action-deadline { flex-shrink: 0; font-size: 12px; color: var(--ink-mute); background: var(--chip); padding: 2px 8px; border-radius: 4px; margin-top: 1px; }
+
+  /* ── Next meeting ── */
+  .next-meeting { background: var(--accent-soft); border: 1px solid #93c5fd; border-radius: 12px; padding: 18px 24px; margin-top: 16px; display: flex; align-items: center; gap: 14px; }
+  .next-meeting .nm-icon { font-size: 28px; }
+  .next-meeting .nm-info { font-size: 14px; font-weight: 700; color: var(--accent); }
+  .next-meeting .nm-sub { font-weight: 400; font-size: 13px; color: var(--ink-sub); display: block; margin-top: 2px; }
+
+  /* ── Empty state ── */
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--ink-mute); }
+  .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* Bubble list */
+  .bubble ul { padding-left: 16px; margin-top: 6px; }
+  .bubble li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<div class="viewer-bar">
+  <div class="viewer-type"><span class="type-badge">宮崎さん</span>コンサルMTG 議事録</div>
+  <select class="viewer-select" id="dateSelect"></select>
+  <div class="viewer-count" id="countLabel"></div>
+</div>
+
+<div class="container" id="content"></div>
+
+<script>
+// ═══ Speaker Config ═══
+const SP = {
+  "小池": { s: "小", c: "#3b82f6" },
+  "兵頭": { s: "兵", c: "#92400e" },
+  "宮崎": { s: "宮", c: "#c2410c" },
+  "岩崎": { s: "岩", c: "#7c3aed" },
+};
+
+// ═══ Render Engine ═══
+function R(m) {
+  return `
+    <div class="header">
+      <div class="header-tags">${m.tags.map(t => `<span class="tag tag-${t[1]}">${t[0]}</span>`).join('')}</div>
+      <h1>${m.title}</h1>
+      <div class="header-sub">${m.subtitle}</div>
+      <div class="meta-row">
+        <span class="meta-item">📅 ${m.date}</span>
+        <span class="meta-item">👥 ${m.participants}</span>
+        <span class="meta-item">🕐 ${m.duration}</span>
+        <span class="meta-item">💻 ${m.format || 'Google Meet'}</span>
+      </div>
+    </div>
+    ${rDec(m.decisions)}
+    ${rTopics(m.topics)}
+    ${rActions(m.actions)}
+    ${rNext(m.nextMeeting)}
+  `;
+}
+
+function rDec(ds) {
+  return `<div class="section decisions"><div class="section-title">✅ 決定事項</div>
+    ${ds.map((d,i) => `<div class="decision-item"><div class="decision-num">${i+1}</div><div class="decision-text"><strong>${d[0]}</strong>：${d[1]}</div></div>`).join('')}
+  </div>`;
+}
+
+function rTopics(topics) {
+  return `<div class="section"><div class="section-title">💬 議論ハイライト</div>
+    ${topics.map((t,i) => `<div class="discussion-topic">
+      <div class="topic-header"><span class="topic-label">TOPIC ${i+1}</span>${t.title}</div>
+      ${t.blocks.map(rBlock).join('')}
+    </div>`).join('')}
+  </div>`;
+}
+
+function rBlock(b) {
+  const type = b[0];
+  if (type === 'u') {
+    const sp = SP[b[1]] || { s: b[1][0], c: '#666' };
+    return `<div class="utterance"><div class="avatar" style="background:${sp.c}">${sp.s}</div>
+      <div class="bubble" style="border-left:3px solid ${sp.c}"><div class="speaker-name">${b[1]}</div>${b[2]}</div></div>`;
+  }
+  if (type === 'conclusion') return `<div class="conclusion-box"><div class="cb-label">結論</div>${b[1]}</div>`;
+  if (type === 'quote') return `<div class="quote-box"><div class="quote-text">「${b[1]}」</div><div class="quote-attr">― ${b[2]}</div></div>`;
+  if (type === 'comparison') return `<div class="comparison-grid">${b[1].map(c => `<div class="comp-card"><div class="ci">${c[0]}</div><div class="ct">${c[1]}</div><div class="cd">${c[2]}</div></div>`).join('')}</div>`;
+  if (type === 'flow') return `<div class="flow-diagram">${b[1].map((s,i) => (i > 0 ? '<div class="flow-arrow">→</div>' : '') + `<div class="flow-step">${s}</div>`).join('')}</div>`;
+  if (type === 'metrics') return `<div class="metric-row">${b[1].map(m => `<div class="metric-card"><div class="mv" style="color:${m[2] || 'var(--accent)'}">${m[0]}</div><div class="ml">${m[1]}</div></div>`).join('')}</div>`;
+  if (type === 'persons') return `<div class="person-grid">${b[1].map(p => `<div class="person-card"><div class="pn"><span class="dot" style="background:${p[2]}"></span>${p[0]}</div><div class="pnote">${p[1]}</div></div>`).join('')}</div>`;
+  if (type === 'benchmarks') return `<div><div class="info-label">${b[2] || 'ベンチマーク'}</div><div class="benchmark-list">${b[1].map(x => `<span class="benchmark-chip">${x}</span>`).join('')}</div></div>`;
+  if (type === 'table') return `<table class="data-table"><thead><tr>${b[1].map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${b[2].map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  return '';
+}
+
+function rActions(actions) {
+  const groups = {};
+  actions.forEach(a => {
+    const key = a.assignees.map(x => x[0]).join('・');
+    if (!groups[key]) groups[key] = { assignees: a.assignees, items: [] };
+    groups[key].items.push(a);
+  });
+  return `<div class="section"><div class="section-title">📋 ネクストアクション</div>
+    ${Object.values(groups).map(g => `<div class="action-group">
+      <div class="action-group-header">
+        ${g.assignees.map((a,i) => { const sp = SP[a[0]] || {s:a[0][0],c:'#666'}; return `<div class="action-group-avatar${i>0?' ag-overlap':''}" style="background:${sp.c}">${sp.s}</div>`; }).join('')}
+        <div class="action-group-name">${g.assignees.map(a => a[0]).join('・')}</div>
+      </div>
+      <ul class="action-list">${g.items.map(a => `<li class="action-item"><div class="action-check"></div><div class="action-text">${a.text}</div>${a.deadline ? `<div class="action-deadline">${a.deadline}</div>` : ''}</li>`).join('')}</ul>
+    </div>`).join('')}
+  </div>`;
+}
+
+function rNext(n) {
+  if (!n) return '';
+  return `<div class="next-meeting"><div class="nm-icon">📅</div><div class="nm-info">${n.text}<span class="nm-sub">${n.sub || ''}</span></div></div>`;
+}
+
+// ═══ Meeting Data ═══
+const MEETINGS = [
+/* __INSERT_NEW_MEETING_HERE__ */
+{
+  date: "2026/04/24",
+  title: "受講生進捗と事業ポジショニングの再定義",
+  subtitle: "宮崎さんコンサルMTG ― Webライティング案件の実態共有、Instagram/Threads集客戦略、B2C→B2Bへの事業転換",
+  tags: [["コンサルMTG","blue"],["マーケ戦略","green"],["事業設計","purple"]],
+  participants: "小池雄悟・兵頭将宏・宮崎博貴",
+  duration: "約60分",
+  format: "Google Meet",
+  decisions: [
+    ["事業ポジショニングの転換","「SNSで月数万円稼ぐ」B2Cスクールではなく、「薬局の採用支援コンサルができる」B2B出口を用意。薬剤師の資格を活かした専門性で差別化。"],
+    ["セミナーの集約","複数テーマを散発的にやるのではなく、王道セミナー1本を作り込み、ファネル（集客〜成約の導線）を徹底的に磨く。"],
+    ["公式Instagramアカウントの開設","インフルエンサー開拓の起点・広告運用の受け皿として必須。Threadsも併せて注力。"],
+    ["受講生テーマのB2B寄せ","テスト受講生に対し、薬局採用支援など自社B2Bに繋がるテーマを個別に割り振る。"]
+  ],
+  topics: [
+    {
+      title: "受講生の進捗と坂本さんのケース",
+      blocks: [
+        ["u","宮崎","坂本さん、意欲は素晴らしいが目標が「ディズニーに行きたい」レベルでざっくり。定量的に聞くと何も返ってこない。初速は早い可能性あるが、つまずいた時に復活できないリスク。"],
+        ["u","小池","かなりラフなセールスで30分くらいで決まった。見積もりの甘さはあるが、ほぼ他人への初セールス成功という意味ではマーケット検証になる。"],
+        ["conclusion","目標の逆算（定量化）とマインドセット教育がコーチングの肝。他責思考に陥らないようコントロールが必要。"]
+      ]
+    },
+    {
+      title: "Webライティング案件のリアル",
+      blocks: [
+        ["u","宮崎","受講生の直近案件：医師監修メディア「糖尿病ラボ」でのゴーストライター。1記事7,000円、医療資格者必須。クリニックの集患・採用目的でメディアを運営。"],
+        ["u","宮崎","Webライティングを選ぶ人の特徴：文章まとめが好き、画像・動画編集が苦手、「子供といる時にSNSを気にしたくない」と仕事の境界を分けたい層。"],
+        ["comparison",[["📱","SNS運用","画像・動画の直感的制作<br>日々の投稿管理が必要<br>常にスマホと向き合う"],["✍️","Webライティング","テキスト中心の作業<br>まとまった時間で集中<br>仕事とプライベートを分離"]]],
+        ["conclusion","ゴーストライター案件は医療資格者の需要が高い。WordPressも教えるためHP制作も可能。案件の出口が明確。"]
+      ]
+    },
+    {
+      title: "集客戦略：Instagram・広告・Threads",
+      blocks: [
+        ["u","宮崎","広告から契約に至るまでが一番難しい。ファネルの成約率を測らないと広告費が決められない。"],
+        ["metrics",[["11%","広告流入の成約率","#dc2626"],["16%","Instagram経由の成約率","#2563eb"],["28%","インフルエンサー経由の成約率","#16a34a"]]],
+        ["u","宮崎","Threadsが今非常に熱い。占いの高単価商材（45万円）で、1日3投稿×1ヶ月で180万円売れた事例あり。"],
+        ["u","小池","6月までは実績づくりフェーズ。広告本格投下はそれ以降。当面はインスタアカウント開設→インフルエンサー開拓→ファネル検証の順。"],
+        ["flow",["公式アカウント開設","インフルエンサー開拓","ファネル構築・検証","広告投下"]],
+        ["conclusion","まずInstagram+Threadsアカウントを開設。インフルエンサー経由でファネルを検証し、成約率データを蓄積してから広告へ。"]
+      ]
+    },
+    {
+      title: "事業ポジショニング：B2C→B2Bへの転換",
+      blocks: [
+        ["u","宮崎","B2Cの副業スクールは激ムズ。フロービジネスで景気にも左右。シーライクスも縮小している。薬局業界にメスを入れるならB2Bの方がポジショニング取れる。"],
+        ["quote","スクール事業単体で儲けるというより、スクールを経てマンパワーを獲得し、薬局業界に様々なアプローチをしていく。そっちのビジョンの方が僕らには合っている","小池"],
+        ["u","宮崎","看護師向けで採用支援コースとして見せて（実態はSNS講座）100万円で売っているスクールに、うち60万円で当たり負けした。出口の見せ方で負けた。"],
+        ["comparison",[["🏪","B2C（現状）","「SNSで月数万円稼ごう」<br>競合多数・景気に左右<br>女性向けは離脱も多い"],["🏢","B2B（目指す方向）","「薬局の採用支援コンサルに」<br>専門性で差別化<br>自社事業とのシナジー"]]],
+        ["u","宮崎","プログラミングスクールと同じ。優秀な卒業生は自社コンサル部隊に引き抜き、そうでない人は自分で案件を取らせる。実質スクール＝採用活動。"],
+        ["conclusion","副業スクールの存在意義を再定義。薬剤師に別のキャリアを提示しつつ、優秀な人材は自社B2B支援に巻き込むエコシステムを構築する。"]
+      ]
+    }
+  ],
+  actions: [
+    { assignees: [["小池"],["兵頭"]], text: "ターゲット（ペルソナ）と事業の存在意義を再定義", deadline: "4月中" },
+    { assignees: [["小池"]], text: "公式Instagram・Threadsアカウントの方向性決定・開設", deadline: "4月中" },
+    { assignees: [["小池"]], text: "テスト受講生への個別面談（B2Bテーマ割り振り）", deadline: "2週間後" },
+    { assignees: [["小池"]], text: "マーケティング戦略の叩き台作成", deadline: "次回MTGまで" },
+    { assignees: [["宮崎"]], text: "Threadsの運用ノウハウ共有（成果報酬でPharma Eight∞のThreads運用を実験）", deadline: "5月〜" }
+  ],
+  nextMeeting: { text: "次回定例MTG：2026年5月7日（木）12:00〜", sub: "具体的なマーケティング戦術の詰め" }
+},
+{
+  date: "2026/04/12",
+  title: "SNS公式アカウント戦略と受講生管理ルールの再設計",
+  subtitle: "宮崎さんコンサルMTG ― 受講生管理の厳格化、SNS公式アカウントの役割定義、5月セミナー確定",
+  tags: [["コンサルMTG","blue"],["SNS戦略","green"],["受講生管理","purple"]],
+  participants: "小池雄悟・兵頭将宏・宮崎博貴",
+  duration: "約50分",
+  format: "Google Meet",
+  decisions: [
+    ["受講生管理ルールの厳格化","週1回の能動的な報告を義務付け、放置・停滞を未然に防ぐ。学習管理シートの共有・更新を徹底する。"],
+    ["SNS公式アカウントの作成を優先","信頼性担保のため必須。流入は「広告/インフルエンサー」、公式アカウントは「受け皿（信頼）＝ホームページ代わり」と役割分担。"],
+    ["5月セミナーの内容を4月15日までに確定","早期告知のため期限を設定。4/30登壇は宮崎さんが資料叩き台を作成。"]
+  ],
+  topics: [
+    {
+      title: "SNS戦略：公式アカウントの必要性と運用",
+      blocks: [
+        ["u","小池","公式アカウントの方向性を決めたい。投稿で伸ばすのか、広告で伸ばすのか。既存のベンチマークがあれば教えてほしい。"],
+        ["u","宮崎","公式アカウントは投稿で伸ばすのは至難。フォロワー獲得は「広告」に振るべき。現在1フォロワーあたり7〜8円で獲得できている実績がある。公式アカウントは契約直前に信頼性を確認してもらう「ホームページ代わり」として機能させるのが正解。"],
+        ["u","宮崎","コンテンツ制作も効率化できる。受講生から7〜10秒の動画素材を1カット100円程度で買い取る（UGC）。投稿頻度は月3〜4回（週1回程度）で十分。"],
+        ["comparison",[
+          ["📢","広告 / インフルエンサー","流入チャネル<br>フォロワー獲得（7〜8円/人）<br>リーチ拡大が目的"],
+          ["🏠","公式アカウント","受け皿 = ホームページ代わり<br>信頼性担保が目的<br>月3〜4回投稿で運用"]
+        ]],
+        ["benchmarks",["リモラボ","シーライクス","ポジエルキャリア"],"ベンチマーク"],
+        ["metrics",[
+          ["7-8円","1フォロワー獲得コスト","#2563eb"],
+          ["月3-4回","投稿頻度目安","#16a34a"],
+          ["~100円","UGC素材 / 1カット","#d97706"]
+        ]],
+        ["conclusion","公式アカウントの器を先に作り、投稿は週1ペース。フォロワー獲得は広告に一任する。コンテンツは受講生UGCで効率化。"]
+      ]
+    },
+    {
+      title: "受講生の進捗管理と能動的報告",
+      blocks: [
+        ["u","小池","4月から4名＋新規1名の計5名体制。池田は7章まで終了して質問もくれるが、他の受講生は質問が来ず進捗が不透明。順調なのか詰まっているのか判別できない。"],
+        ["u","宮崎","学習管理シートを使うべき。開始日を入力すれば各章の完了目安が自動計算される仕組みにできる。受講生側から週1回シートを更新して報告させるルールにする。"],
+        ["quote","1週間何もできていない時間が最ももったいない","宮崎"],
+        ["u","兵頭","「やらされている感」を避けるため自律的な報告を促す声掛けが重要。進捗が遅れている人にはコーチが面談を設定してサポートする形がいい。"],
+        ["flow",["開始日入力","目安自動計算","週1報告","遅延検知","コーチ面談"]],
+        ["conclusion","週1回の能動的報告を義務化。学習管理シートで進捗を可視化し、遅延者にはコーチが面談でフォロー。2週間に1回では遅すぎる。"]
+      ]
+    },
+    {
+      title: "受講生の傾向分析",
+      blocks: [
+        ["u","兵頭","受講生ごとに傾向が違う。池田・向井はオリジナルに走る懸念がある。岩崎・瀬口はセンスが良く企業に馴染みやすい印象。"],
+        ["u","小池","受講生ごとにフォルダを作成し、資料を一元管理する運用を導入しよう。"],
+        ["persons",[
+          ["池田・向井","オリジナルに走る懸念あり。方向性の軌道修正が必要。","#d97706"],
+          ["岩崎・瀬口","センスが良く企業に馴染みやすい。安定して進行中。","#16a34a"]
+        ]]
+      ]
+    },
+    {
+      title: "ウェブライティング講座の展望",
+      blocks: [
+        ["u","宮崎","ターゲット層は35歳以上。動画よりGoogle検索・文章で情報を取る層。薬剤師は文献調査・内容のまとめに慣れておりライティング業務と親和性が極めて高い。SNSに抵抗感がある層への新たなアプローチになる。"],
+        ["conclusion","35歳以上のSNS抵抗層に向けたウェブライティング講座を新規アプローチとして検討。薬剤師の文献スキルとの親和性が高い。"]
+      ]
+    }
+  ],
+  actions: [
+    { assignees: [["小池"]], text: "SNS公式アカウントの器作成・初期設定", deadline: "次回MTGまで" },
+    { assignees: [["小池"]], text: "受講生への進捗報告ルールの周知・徹底", deadline: "至急" },
+    { assignees: [["小池"]], text: "バックオフィス側の受講生管理フォルダ整備", deadline: "順次" },
+    { assignees: [["小池"],["兵頭"]], text: "5月セミナーの内容決定", deadline: "4/15" },
+    { assignees: [["宮崎"]], text: "4/30登壇セミナーの資料叩き台作成", deadline: "4/20の週" }
+  ],
+  nextMeeting: { text: "次回定例MTG：2026年4月24日（金）14:00〜15:00", sub: "LP進捗確認・SNS公式アカウントレビュー" }
+},
+{
+  date: "2026/03/15",
+  title: "副業スクール設計と事例づくりの優先方針",
+  subtitle: "宮崎さんコンサルMTG ― 職種名より「複業スクール」、対人×非対面の二本柱、モニター事例作り",
+  tags: [["コンサルMTG","blue"],["プロダクト設計","green"],["事例づくり","amber"]],
+  participants: "小池雄悟・兵頭将宏・宮崎博貴",
+  duration: "約90分",
+  format: "Google Meet",
+  decisions: [
+    ["打ち出し方は「複業スクール」","FP養成やSNS講座など職種名を前面に出さず、複数スキルが学べるスクールとして訴求。スキル単位で見せる方が医療資格者には刺さる。"],
+    ["対人系×非対面系の二本柱","対人系（FP等）と非対面系（SNS・Webライティング）の大枠で設計。適性・時間の使い方・顔出し可否で選択。1講座55万・2講座88万。"],
+    ["モニター事例づくりが最優先","SNS講座用1名・Webライティング用1名を選定。成果報酬型で進め、薬剤師の成功事例を早期に確立する。"],
+    ["小池さんは半額（5万円）で受講","事例作りの主対象ではなく、プロダクト理解・サポートイメージ把握が目的。"],
+    ["案件紹介・ギルド化は初手では打ち出さない","品質担保・ディレクション体制の課題が大きい。将来ビジョンとしてはありだが、初期から約束すると苦しくなる。"]
+  ],
+  topics: [
+    {
+      title: "打ち出し方：職種訴求 vs スキル訴求",
+      blocks: [
+        ["u","宮崎","「FP」と名乗ると顧客側に「FPをやるかどうか」という余計な判断軸が増える。うちはキャリアコーチングと言っていて、判断軸を増やさないセールス。"],
+        ["u","小池","ヒアリング能力、画像作成技術、SNS運用…スキル単位で見せて「全部学べます」の打ち出し方に。卒業生モデルで事例を見せればいい。"],
+        ["comparison",[["❌","職種訴求（FP養成・SNS講座）","判断軸が増える<br>「FPをやるかどうか」で離脱<br>競合と比較されやすい"],["✅","スキル訴求（複業スクール）","副業やるかどうかだけのYes/No<br>学べるスキルの多さが魅力<br>医療資格者に刺さる"]]],
+        ["conclusion","フロントでは職種名を出さず「複業スクール」として訴求。卒業生の活躍事例で出口を見せる方式。"]
+      ]
+    },
+    {
+      title: "対人系 / 非対面系の二本柱設計",
+      blocks: [
+        ["u","宮崎","受講生が選ぶ際は興味だけでなく、時間の使い方・顔出し可否・適性で分かれる。夜しか時間がない人→デジタル系、対人コミュニケーションが強い人→対人系。"],
+        ["u","小池","SNS講座は自分で運用＋代行業の両方が入っている。10章までが自分のアカウント運用、11〜14章が代行業特化。Webライティングも同様。"],
+        ["comparison",[["🤝","対人系（FP等）","アポの時間が必要<br>顔出し前提<br>対人コミュニケーション力"],["💻","非対面系（SNS・ライティング）","時間の融通が利く<br>顔出し不要も可<br>コツコツ型向き"]]],
+        ["conclusion","1講座55万・2講座88万の構造で、プランに応じて選択可能に。適性判断は面談時or受講初期1ヶ月で実施。"]
+      ]
+    },
+    {
+      title: "事例づくり戦略",
+      blocks: [
+        ["u","宮崎","事例作りが目的なら、ど真ん中ペルソナでコミット力のある人を。学び始めて案件獲得は早くて2ヶ月、月5〜10万の事例には3〜4ヶ月かかる。"],
+        ["u","小池","小池さんは事例の主対象ではなく、プロダクト理解目的で半額受講。本命の事例はモニター2名で。ペルソナに沿った事例設計が重要。"],
+        ["flow",["モニター選定","受講開始","案件獲得(2ヶ月)","月5-10万達成(3-4ヶ月)","事例化"]],
+        ["u","宮崎","費用は成果報酬型で、稼いだ分から返済する設計も可。途中離脱時の処理・回収方法は事前整理が必要。"],
+        ["conclusion","SNS講座用・Webライティング用各1名のモニターを選定し、成果報酬型で進める。小池さんは半額受講でプロダクト理解。"]
+      ]
+    },
+    {
+      title: "ギルド化・案件紹介の取り扱い",
+      blocks: [
+        ["u","宮崎","案件紹介をコミットすると苦しくなる。品質担保とディレクション体制が課題。マーケまでわかるディレクターがいないと成立しない。"],
+        ["u","小池","案件紹介がないから決めないという人はいない。初手では打ち出さず、将来的なビジョンとして温存する方が現実的。"],
+        ["conclusion","ギルド化・案件紹介は将来ビジョンとして保持するが、初期から約束はしない。まずは副業スクールとしての実績づくりを優先。"]
+      ]
+    }
+  ],
+  actions: [
+    { assignees: [["小池"]], text: "SNS講座用モニター候補の選定", deadline: "3/29まで" },
+    { assignees: [["小池"]], text: "Webライティング用モニター候補の選定", deadline: "3/29まで" },
+    { assignees: [["小池"]], text: "宮崎さんの講座を半額（5万円）で受講開始", deadline: "3月中" },
+    { assignees: [["宮崎"]], text: "ユメマチ社宛ての請求書修正・送付", deadline: "今週中" },
+    { assignees: [["宮崎"]], text: "講座内容の作り込み（御社用カスタマイズ）", deadline: "3/29まで" },
+    { assignees: [["兵頭"]], text: "4月セミナー日程の整理・組合への打ち出し方検討", deadline: "3/29まで" }
+  ],
+  nextMeeting: { text: "次回定例MTG：2026年3月29日（土）9:00〜", sub: "コンテンツ作り込み・モニター選定・宴ステップ配信修正" }
+},
+{
+  date: "2026/03/08",
+  title: "LP一本化戦略とLINE導線の二系統設計",
+  subtitle: "宮崎さんコンサルMTG ― LP統合方針、LINE登録直後アンケートの4択簡素化、セミナー用×個別相談用の導線分離",
+  tags: [["コンサルMTG","blue"],["LP設計","green"],["LINE設計","amber"]],
+  participants: "小池雄悟・兵頭将宏・宮崎博貴",
+  duration: "約60分",
+  format: "Google Meet",
+  decisions: [
+    ["LPは1本で運用","主訴求は副業。LP内に「3種類のセミナーがある」要素を含め、インフルエンサーが訴求しやすい構成にする。"],
+    ["LINE導線を2系統に分離","セミナー導線（新規流入向け）と個別相談導線（既存接点向け）を分けて設計。リッチメニューも導線ごとに変更。"],
+    ["登録直後アンケートは副業の悩みに特化","選択肢を4択に絞り回答率を担保。「副業における壁・止まりポイント」を把握する設計に変更。"],
+    ["口コミ動画の収集完了を急ぐ","既存サポート対象者の動画を今週〜来週で回収完了。LP・セミナーの透明性向上素材として活用。"],
+    ["特典を8個まで拡充","スマホ用特典を現在の3個から8個程度まで増やす。診断テスト型コンテンツなども追加。"]
+  ],
+  topics: [
+    {
+      title: "LP戦略：1本化 vs 複数化",
+      blocks: [
+        ["u","宮崎","インフルエンサーへのアンケートで、複数レパートリーのセミナーがある方が訴求しやすいという結果（7:3）。ただしLPは1メッセージに絞る原則もある。"],
+        ["u","小池","LPは1本にして主訴求は副業。管理負荷を考えると複数は厳しい。訴求素材の数を増やす方がいい。"],
+        ["u","宮崎","LPの中に3種類のセミナーがあるよという要素が少しでも含まれていれば、インフルエンサーは訴求しやすい。"],
+        ["conclusion","LP1本・副業訴求メインを維持しつつ、3種セミナーの存在を盛り込む。訴求はストーリーやリール側で変化させる。"]
+      ]
+    },
+    {
+      title: "LINE登録直後アンケートの再設計",
+      blocks: [
+        ["u","宮崎","現在のアンケートは選択肢8つで広すぎる。複数回答にすると毎回同じ自動返信が流れてUXが悪い。"],
+        ["u","小池","流入が副業訴求なのに、初回で他テーマまで広く聞くのは早すぎる。副業における悩み・壁に絞るべき。"],
+        ["flow",["LINE登録","4択アンケート","回答ありがとう","セミナー案内"]],
+        ["u","宮崎","4択なら一目でパッと見れる。回答後は「回答ありがとうございます→セミナーで詳しく説明しています」で案内へ。"],
+        ["conclusion","登録直後は副業の悩み4択のみ。セミナー後アンケートで他領域への興味を回収する役割分担。"]
+      ]
+    },
+    {
+      title: "セミナー用 × 個別相談用の導線分離",
+      blocks: [
+        ["u","宮崎","既存客もLPを踏めば新しいシナリオが流れる。タグで分岐可能。「新規/既存」ではなく「セミナー訴求/個別相談訴求」で分ける方がチーム運用しやすい。"],
+        ["comparison",[["📢","セミナー導線","インフルエンサー・新規流入向け<br>副業アンケート→セミナー案内<br>リッチメニューは基本不要"],["💬","個別相談導線","既存接点あり・直接相談向け<br>シンプルに予約案内<br>リッチメニューは相談訴求型"]]],
+        ["u","小池","個別相談導線はシンプルに。予約案内だけ送り、余計な設計はしない。セミナー情報の全体配信は受け取る形でOK。"],
+        ["conclusion","2系統で運用。個別相談導線は相談予約案内のみ。セミナー情報は全体配信として両方に配信。"]
+      ]
+    },
+    {
+      title: "LPの訴求力強化：透明性とコピー",
+      blocks: [
+        ["u","宮崎","LPで重要なのはデザインより透明性。セミナー録画の切り抜き（30秒〜1分）を入れると登録率が上がる。女性が喋る動画をトップに置くのも効果的。"],
+        ["u","小池","口コミ動画の切り抜きも入れたい。コピー（キャッチコピー）のA/Bテストの方がデザインより重要。"],
+        ["conclusion","LP強化の優先順位：コピー > 口コミ・実績動画 > セミナー切り抜き > デザイン。透明性を高めてCVRを上げる。"]
+      ]
+    }
+  ],
+  actions: [
+    { assignees: [["小池"]], text: "口コミ動画の回収完了", deadline: "3月中旬" },
+    { assignees: [["小池"]], text: "特典を8個程度まで拡充", deadline: "3月中" },
+    { assignees: [["小池"]], text: "LP文面・コピー整理（プロフィール等の反映）", deadline: "3月中" },
+    { assignees: [["宮崎"]], text: "LINE設計修正（セミナー用・個別相談用の2系統）", deadline: "今週中" },
+    { assignees: [["宮崎"]], text: "初回アンケート4択案の提案", deadline: "今週中" },
+    { assignees: [["兵頭"]], text: "セミナーLP作成依頼（宴で制作）", deadline: "3月中" }
+  ],
+  nextMeeting: { text: "次回定例MTG：2026年3月15日（日）15:00〜", sub: "LINE設計完了確認・LP進捗・口コミ動画レビュー" }
+},
+];
+
+// ═══ Init ═══
+const sel = document.getElementById('dateSelect');
+const content = document.getElementById('content');
+const countLabel = document.getElementById('countLabel');
+
+MEETINGS.forEach((m, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = m.date + '  ' + m.title;
+  sel.appendChild(opt);
+});
+countLabel.textContent = `全${MEETINGS.length}件`;
+
+function show(i) { content.innerHTML = R(MEETINGS[i]); }
+sel.addEventListener('change', () => show(sel.value));
+show(0);
+</script>
+</body>
+</html>
